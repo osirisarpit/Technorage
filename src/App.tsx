@@ -3,7 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import Dashboard from "@/pages/Dashboard";
+import CreateTask from "@/pages/CreateTask";
+import MemberList from "@/pages/MemberList";
+import AssignedTasks from "@/pages/AssignedTasks";
+import FeedbackHub from "@/pages/FeedbackHub";
+import SmartSuggestions from "@/pages/SmartSuggestions";
+import Settings from "@/pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -15,8 +22,15 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route element={<DashboardLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/create-task" element={<CreateTask />} />
+            <Route path="/members" element={<MemberList />} />
+            <Route path="/tasks" element={<AssignedTasks />} />
+            <Route path="/feedback" element={<FeedbackHub />} />
+            <Route path="/suggestions" element={<SmartSuggestions />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
