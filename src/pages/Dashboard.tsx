@@ -52,14 +52,12 @@ const Dashboard = () => {
           value={totalMembers}
           icon={Users}
           color="blue"
-          trend={{ value: 12, isPositive: true }}
         />
         <StatCard
           title="Tasks Assigned"
           value={tasksAssigned}
           icon={ClipboardList}
           color="primary"
-          trend={{ value: 8, isPositive: true }}
         />
         <StatCard
           title="Tasks Pending"
