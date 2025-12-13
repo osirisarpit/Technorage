@@ -14,6 +14,7 @@ import {
   Sun
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -22,18 +23,31 @@ interface SidebarProps {
   onThemeToggle: () => void;
 }
 
-const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/create-task', icon: PlusCircle, label: 'Create Task' },
-  { path: '/members', icon: Users, label: 'Member List' },
-  { path: '/tasks', icon: ClipboardList, label: 'Assigned Tasks' },
-  { path: '/feedback', icon: MessageSquare, label: 'Feedback Hub' },
-  { path: '/suggestions', icon: Sparkles, label: 'Smart Suggestions' },
-  { path: '/settings', icon: Settings, label: 'Settings' },
+interface NavItem {
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  roles: ('lead' | 'member')[];
+}
+
+const allNavItems: NavItem[] = [
+  { path: '/', icon: LayoutDashboard, label: 'Dashboard', roles: ['lead', 'member'] },
+  { path: '/create-task', icon: PlusCircle, label: 'Create Task', roles: ['lead'] },
+  { path: '/members', icon: Users, label: 'Member List', roles: ['lead'] },
+  { path: '/tasks', icon: ClipboardList, label: 'Tasks', roles: ['lead', 'member'] },
+  { path: '/feedback', icon: MessageSquare, label: 'Feedback Hub', roles: ['lead'] },
+  { path: '/suggestions', icon: Sparkles, label: 'Smart Suggestions', roles: ['lead'] },
+  { path: '/settings', icon: Settings, label: 'Settings', roles: ['lead', 'member'] },
 ];
 
 export const Sidebar = ({ collapsed, onToggle, isDarkMode, onThemeToggle }: SidebarProps) => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  // Filter nav items based on user role
+  const navItems = allNavItems.filter(item => 
+    user && item.roles.includes(user.role)
+  );
 
   return (
     <aside 

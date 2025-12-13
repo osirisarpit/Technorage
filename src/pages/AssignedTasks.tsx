@@ -9,9 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { tasks, verticals, Task, TaskStatus } from '@/data/dummyData';
+import { verticals, Task, TaskStatus } from '@/data/dummyData';
+import { useTasks } from '@/contexts/TasksContext';
 import { TaskCard } from '@/components/cards/TaskCard';
 import { FeedbackDialog } from '@/components/dialogs/FeedbackDialog';
+import { TaskSubmissionDialog } from '@/components/dialogs/TaskSubmissionDialog';
 import { cn } from '@/lib/utils';
 
 const statuses: TaskStatus[] = [
@@ -24,6 +26,7 @@ const statuses: TaskStatus[] = [
 ];
 
 const AssignedTasks = () => {
+  const { tasks } = useTasks();
   const [search, setSearch] = useState('');
   const [verticalFilter, setVerticalFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -31,6 +34,8 @@ const AssignedTasks = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [feedbackTask, setFeedbackTask] = useState<Task | null>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [submissionOpen, setSubmissionOpen] = useState(false);
 
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch = task.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -153,6 +158,10 @@ const AssignedTasks = () => {
                   setFeedbackTask(t);
                   setFeedbackOpen(true);
                 }}
+                onClick={(t) => {
+                  setSelectedTask(t);
+                  setSubmissionOpen(true);
+                }}
               />
             </div>
           ))}
@@ -182,6 +191,12 @@ const AssignedTasks = () => {
         task={feedbackTask}
         open={feedbackOpen}
         onOpenChange={setFeedbackOpen}
+      />
+
+      <TaskSubmissionDialog
+        task={selectedTask}
+        open={submissionOpen}
+        onOpenChange={setSubmissionOpen}
       />
     </div>
   );

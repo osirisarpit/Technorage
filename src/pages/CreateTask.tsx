@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Star, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -13,19 +13,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { verticals, members } from '@/data/dummyData';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { verticals, TaskStatus, Priority } from '@/data/dummyData';
+import { useTasks } from '@/contexts/TasksContext';
 import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const CreateTask = () => {
   const navigate = useNavigate();
-  const [isOpenTask, setIsOpenTask] = useState(false);
+  const { addTask } = useTasks();
   const [files, setFiles] = useState<string[]>([]);
+  const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const [ratingPopoverOpen, setRatingPopoverOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     vertical: '',
-    assignee: '',
-    priority: '',
     deadline: '',
     estimatedTime: '',
   });
@@ -33,7 +40,7 @@ const CreateTask = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.vertical || !formData.priority || !formData.deadline) {
+    if (!formData.title || !formData.vertical || !formData.deadline) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields.",
@@ -42,9 +49,23 @@ const CreateTask = () => {
       return;
     }
 
+    // Add the new task
+    // deadline will be formatted in TasksContext
+    addTask({
+      title: formData.title,
+      description: formData.description || '',
+      vertical: formData.vertical as any,
+      assignedTo: null, // Ensure it's unassigned
+      status: 'Allocated' as TaskStatus,
+      priority: 'Medium' as Priority, // Default priority
+      deadline: formData.deadline, // Pass the date string (YYYY-MM-DD format)
+      estimatedTime: formData.estimatedTime || '',
+      rating: selectedRatings.length > 0 ? selectedRatings[0] : undefined, // Use first selected rating or undefined
+    });
+
     toast({
       title: "Task Created!",
-      description: `"${formData.title}" has been created successfully.`,
+      description: `"${formData.title}" has been created successfully and appears as unassigned.`,
     });
 
     navigate('/tasks');
@@ -96,96 +117,134 @@ const CreateTask = () => {
           />
         </div>
 
-        {/* Vertical & Assignment Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Assign To *</Label>
-            <Select
-              value={formData.vertical}
-              onValueChange={(value) => setFormData({ ...formData, vertical: value })}
-            >
-              <SelectTrigger className="bg-secondary/50">
-                <SelectValue placeholder="Select vertical" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Overall Club">Overall Club</SelectItem>
-                {verticals.map((vertical) => (
-                  <SelectItem key={vertical} value={vertical}>
-                    {vertical}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Assignee</Label>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={isOpenTask}
-                  onCheckedChange={setIsOpenTask}
-                  id="open-task"
-                />
-                <Label htmlFor="open-task" className="text-sm text-muted-foreground cursor-pointer">
-                  Open Task
-                </Label>
-              </div>
-            </div>
-            <Select
-              value={formData.assignee}
-              onValueChange={(value) => setFormData({ ...formData, assignee: value })}
-              disabled={isOpenTask}
-            >
-              <SelectTrigger className="bg-secondary/50">
-                <SelectValue placeholder={isOpenTask ? "Anyone can pick" : "Select member"} />
-              </SelectTrigger>
-              <SelectContent>
-                {members.map((member) => (
-                  <SelectItem key={member.id} value={member.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{member.name}</span>
-                      <span className="text-xs text-muted-foreground">({member.vertical})</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Vertical */}
+        <div className="space-y-2">
+          <Label>Assign To *</Label>
+          <Select
+            value={formData.vertical}
+            onValueChange={(value) => setFormData({ ...formData, vertical: value })}
+          >
+            <SelectTrigger className="bg-secondary/50">
+              <SelectValue placeholder="Select vertical" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Overall Club">Overall Club</SelectItem>
+              {verticals.map((vertical) => (
+                <SelectItem key={vertical} value={vertical}>
+                  {vertical}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Priority & Deadline Row */}
+        {/* Rating, Deadline & Estimated Time Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label>Priority *</Label>
-            <Select
-              value={formData.priority}
-              onValueChange={(value) => setFormData({ ...formData, priority: value })}
-            >
-              <SelectTrigger className="bg-secondary/50">
-                <SelectValue placeholder="Select priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Low">
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-google-green" />
-                    Low
-                  </span>
-                </SelectItem>
-                <SelectItem value="Medium">
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-google-yellow" />
-                    Medium
-                  </span>
-                </SelectItem>
-                <SelectItem value="High">
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-google-red" />
-                    High
-                  </span>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Rating</Label>
+            <Popover open={ratingPopoverOpen} onOpenChange={setRatingPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className={cn(
+                    "w-full justify-between bg-secondary/50",
+                    selectedRatings.length === 0 && "text-muted-foreground"
+                  )}
+                >
+                  {selectedRatings.length > 0 ? (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {selectedRatings.sort().map((rating) => (
+                        <div key={rating} className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={cn(
+                                  "w-3 h-3",
+                                  i < rating
+                                    ? "fill-google-yellow text-google-yellow"
+                                    : "fill-gray-200 text-gray-200"
+                                )}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs">{rating}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span>Select ratings (1-5 stars)</span>
+                  )}
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[250px] p-0">
+                <div className="p-2 space-y-2">
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <div
+                      key={rating}
+                      className="flex items-center space-x-2 p-2 rounded-md hover:bg-secondary/50 cursor-pointer"
+                      onClick={() => {
+                        setSelectedRatings((prev) =>
+                          prev.includes(rating)
+                            ? prev.filter((r) => r !== rating)
+                            : [...prev, rating]
+                        );
+                      }}
+                    >
+                      <Checkbox
+                        checked={selectedRatings.includes(rating)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedRatings((prev) => [...prev, rating]);
+                          } else {
+                            setSelectedRatings((prev) => prev.filter((r) => r !== rating));
+                          }
+                        }}
+                      />
+                      <div className="flex items-center gap-2 flex-1">
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={cn(
+                                "w-4 h-4",
+                                i < rating
+                                  ? "fill-google-yellow text-google-yellow"
+                                  : "fill-gray-200 text-gray-200"
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm">
+                          {rating} {rating === 1 ? 'star' : 'stars'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  {selectedRatings.length > 0 && (
+                    <div className="pt-2 border-t border-border">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-xs"
+                        onClick={() => {
+                          setSelectedRatings([]);
+                        }}
+                      >
+                        Clear all
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+            {selectedRatings.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {selectedRatings.length} rating{selectedRatings.length > 1 ? 's' : ''} selected
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

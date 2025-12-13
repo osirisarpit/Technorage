@@ -1,3 +1,4 @@
+import React from 'react';
 import { Activity } from '@/data/dummyData';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';

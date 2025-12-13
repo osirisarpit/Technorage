@@ -1,9 +1,10 @@
-import { Clock, Paperclip, User, MessageSquare } from 'lucide-react';
+import { Clock, Paperclip, User, MessageSquare, UserCircle } from 'lucide-react';
 import { Task } from '@/data/dummyData';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { PriorityBadge } from '@/components/ui/priority-badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
@@ -15,6 +16,16 @@ interface TaskCardProps {
 export const TaskCard = ({ task, onFeedback, onClick }: TaskCardProps) => {
   const isOverdue = task.status === 'Overdue';
   const needsReview = task.status === 'Under Review' || task.status === 'Completed';
+
+  // Get initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <div
@@ -36,6 +47,41 @@ export const TaskCard = ({ task, onFeedback, onClick }: TaskCardProps) => {
         <StatusBadge status={task.status} />
       </div>
 
+      {/* Assigned Person Section - Prominent */}
+      <div className="mb-4 p-3 rounded-lg bg-secondary/50 border border-border">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {task.assignedToName ? (
+              <>
+                <Avatar className="w-8 h-8 shrink-0">
+                  <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                    {getInitials(task.assignedToName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground mb-0.5">Assigned to</p>
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {task.assignedToName}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <UserCircle className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground mb-0.5">Assigned to</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Unassigned
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Progress Bar */}
       <div className="mb-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
@@ -53,13 +99,6 @@ export const TaskCard = ({ task, onFeedback, onClick }: TaskCardProps) => {
           <Clock className="w-3 h-3" />
           <span>{task.deadline}</span>
         </div>
-
-        {task.assignedToName && (
-          <div className="flex items-center gap-1">
-            <User className="w-3 h-3" />
-            <span>{task.assignedToName}</span>
-          </div>
-        )}
 
         {task.attachments > 0 && (
           <div className="flex items-center gap-1">
