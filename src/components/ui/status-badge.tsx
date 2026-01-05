@@ -18,12 +18,12 @@ export const StatusBadge = ({ status, className }: StatusBadgeProps) => {
       <span
         className={cn(
           "w-1.5 h-1.5 rounded-full mr-1.5",
-          status === 'Allocated' && "bg-status-allocated",
-          status === 'Working' && "bg-status-working",
-          status === 'Completed' && "bg-status-completed",
-          status === 'Under Review' && "bg-status-review",
-          status === 'Revision Required' && "bg-status-revision",
-          status === 'Overdue' && "bg-status-overdue animate-pulse"
+          status === 'Allocated' && "bg-gray-500",
+          status === 'Working' && "bg-[#4285F4]",
+          status === 'Completed' && "bg-[#34A853]",
+          status === 'Under Review' && "bg-[#9C27B0]",
+          status === 'Revision Required' && "bg-[#FF9800]",
+          status === 'Overdue' && "bg-[#EA4335] animate-pulse"
         )}
       />
       {status}

@@ -19,7 +19,7 @@ export const DashboardLayout = () => {
   }, [isDarkMode]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -29,21 +29,21 @@ export const DashboardLayout = () => {
 
       <div
         className={cn(
-          "transition-all duration-300",
+          "transition-all duration-300 bg-gray-50",
           sidebarCollapsed ? "ml-20" : "ml-64"
         )}
       >
         <Header currentVertical="Design" />
 
-        <main className="p-6">
+        <main className="p-6 bg-gray-50 min-h-screen">
           <Outlet />
         </main>
       </div>
 
-      {/* FAB Button */}
+      {/* FAB Button - Google Material Design */}
       <button
         onClick={() => navigate('/create-task')}
-        className="fab-button"
+        className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-[#4285F4] text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-[#3367D6] z-50"
         aria-label="Create new task"
       >
         <Plus className="w-6 h-6" />

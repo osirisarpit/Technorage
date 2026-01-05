@@ -535,21 +535,21 @@ export const verticals: Vertical[] = [
 
 export const getStatusColor = (status: TaskStatus): string => {
   const colors: Record<TaskStatus, string> = {
-    'Allocated': 'bg-status-allocated/20 text-status-allocated border-status-allocated/30',
-    'Working': 'bg-status-working/20 text-status-working border-status-working/30',
-    'Completed': 'bg-status-completed/20 text-status-completed border-status-completed/30',
-    'Under Review': 'bg-status-review/20 text-status-review border-status-review/30',
-    'Revision Required': 'bg-status-revision/20 text-status-revision border-status-revision/30',
-    'Overdue': 'bg-status-overdue/20 text-status-overdue border-status-overdue/30'
+    'Allocated': 'bg-gray-100 text-gray-700 border-gray-300',
+    'Working': 'bg-blue-50 text-[#4285F4] border-blue-200',
+    'Completed': 'bg-green-50 text-[#34A853] border-green-200',
+    'Under Review': 'bg-purple-50 text-[#9C27B0] border-purple-200',
+    'Revision Required': 'bg-orange-50 text-[#FF9800] border-orange-200',
+    'Overdue': 'bg-red-50 text-[#EA4335] border-red-200'
   };
   return colors[status];
 };
 
 export const getPriorityColor = (priority: Priority): string => {
   const colors: Record<Priority, string> = {
-    'Low': 'priority-low',
-    'Medium': 'priority-medium',
-    'High': 'priority-high'
+    'Low': 'bg-green-50 text-[#34A853] border-green-200',
+    'Medium': 'bg-yellow-50 text-[#FBBC04] border-yellow-200',
+    'High': 'bg-red-50 text-[#EA4335] border-red-200'
   };
   return colors[priority];
 };

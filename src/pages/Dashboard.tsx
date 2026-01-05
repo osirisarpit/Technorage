@@ -49,67 +49,24 @@ const Dashboard = () => {
   }, {} as Record<string, Task[]>);
 
   return (
-    <div className="min-h-screen bg-white font-sans text-[#202124] relative selection:bg-[#4285F4]/30 overflow-hidden">
-      
-      {/* --- START: NEW ANIMATED BACKGROUND --- */}
-      <style>{`
-        @keyframes float-slow {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(40px, -60px) rotate(180deg); }
-        }
-        @keyframes float-medium {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(-50px, 30px) rotate(-180deg); }
-        }
-        @keyframes float-reverse {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(-30px, -30px) rotate(90deg); }
-        }
-      `}</style>
-
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {/* Blue Shapes */}
-        <div className="absolute top-20 left-[10%] w-20 h-20 bg-[#4285F4]/10 rounded-2xl animate-[float-slow_20s_ease-in-out_infinite]" />
-        <div className="absolute bottom-40 right-[20%] w-16 h-16 bg-[#4285F4]/10 rounded-full animate-[float-medium_18s_ease-in-out_infinite_reverse]" />
-        <div className="absolute top-[40%] left-[5%] w-10 h-10 bg-[#4285F4]/20 rounded-2xl animate-[float-reverse_25s_ease-in-out_infinite_1s]" />
-
-        {/* Red Shapes */}
-        <div className="absolute top-40 right-[15%] w-24 h-24 bg-[#EA4335]/10 rounded-full animate-[float-medium_22s_ease-in-out_infinite_2s]" />
-        <div className="absolute bottom-20 left-[25%] w-14 h-14 bg-[#EA4335]/10 rounded-2xl animate-[float-slow_15s_ease-in-out_infinite_reverse]" />
+    <div className="min-h-screen bg-gray-50 font-sans text-[#202124] relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Yellow Shapes */}
-        <div className="absolute top-[30%] left-[40%] w-12 h-12 bg-[#FBBC04]/20 rounded-2xl animate-[float-reverse_20s_ease-in-out_infinite_3s]" />
-        <div className="absolute bottom-[30%] right-[5%] w-20 h-20 bg-[#FBBC04]/10 rounded-full animate-[float-slow_24s_ease-in-out_infinite_1s]" />
-
-        {/* Green Shapes */}
-        <div className="absolute top-10 right-[40%] w-16 h-16 bg-[#34A853]/10 rounded-2xl animate-[float-slow_19s_ease-in-out_infinite_4s]" />
-        <div className="absolute bottom-10 right-[45%] w-28 h-28 bg-[#34A853]/10 rounded-full animate-[float-medium_21s_ease-in-out_infinite_reverse]" />
-        <div className="absolute top-[60%] left-[20%] w-8 h-8 bg-[#34A853]/20 rounded-2xl animate-[float-reverse_23s_ease-in-out_infinite_2s]" />
-
-        {/* Extra grey subtle shapes for depth */}
-        <div className="absolute top-[50%] right-[30%] w-6 h-6 bg-gray-200/50 rounded-2xl animate-[float-slow_30s_ease-in-out_infinite]" />
-        <div className="absolute bottom-[15%] left-[50%] w-10 h-10 bg-gray-200/50 rounded-full animate-[float-medium_28s_ease-in-out_infinite_reverse]" />
-      </div>
-      {/* --- END: NEW ANIMATED BACKGROUND --- */}
-
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        
-        {/* Header Section */}
-        <header className="mb-12">
-          <div className="flex items-center gap-2 mb-2">
+        {/* Header Section - Google Material Design */}
+        <header className="mb-10">
+          <div className="flex items-center gap-2 mb-3">
              <div className="flex gap-1">
                 <span className="w-2 h-2 rounded-full bg-[#4285F4]"></span>
                 <span className="w-2 h-2 rounded-full bg-[#EA4335]"></span>
                 <span className="w-2 h-2 rounded-full bg-[#FBBC04]"></span>
                 <span className="w-2 h-2 rounded-full bg-[#34A853]"></span>
              </div>
-             <span className="text-xs font-semibold text-gray-500 tracking-wider uppercase">Internal Dashboard</span>
+             <span className="text-xs font-medium text-gray-500 tracking-wider uppercase">Dashboard</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[#202124] mb-3">
-            Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4285F4] via-[#EA4335] to-[#FBBC04]">{user?.name || 'Developer'}</span>
+          <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-[#202124] mb-2">
+            Hello, <span className="font-medium text-[#4285F4]">{user?.name || 'Developer'}</span>
           </h1>
-          <p className="text-lg text-gray-500 max-w-2xl">
+          <p className="text-base text-gray-600 max-w-2xl">
             {user?.role === 'lead' 
               ? "Oversee community progress and manage vertical assignments."
               : "Let's build something amazing together. Check your tasks below."
@@ -119,59 +76,57 @@ const Dashboard = () => {
 
         <div className="space-y-12">
           
-          {/* Section 1: Open Opportunities (Open for All) */}
-          <section>
+          {/* Section 1: Open Opportunities (Open for All) - Google Material Design */}
+          <section className="mb-10">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-white rounded-full shadow-sm border border-gray-100 text-[#4285F4]">
-                <Globe className="w-6 h-6" />
+              <div className="p-2.5 bg-white rounded-lg shadow-sm border border-gray-200 text-[#4285F4]">
+                <Globe className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-[#202124]">Open Opportunities</h2>
-                <p className="text-sm text-gray-500">Tasks available for the entire community</p>
+                <h2 className="text-xl font-medium text-[#202124]">Open Opportunities</h2>
+                <p className="text-sm text-gray-600">Tasks available for the entire community</p>
               </div>
             </div>
 
-            {/* Gradient Border Container for "Open" Tasks */}
-            <div className="relative group rounded-3xl p-[2px] bg-gradient-to-r from-[#4285F4] via-[#EA4335] to-[#34A853] shadow-sm">
-              <div className="bg-white/95 backdrop-blur-sm rounded-[22px] p-6 h-full">
-                {openForAllTasks.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {openForAllTasks.map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        onFeedback={(t) => {
-                          setFeedbackTask(t);
-                          setFeedbackOpen(true);
-                        }}
-                      />
-                    ))}
+            {/* Clean Container for "Open" Tasks */}
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              {openForAllTasks.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {openForAllTasks.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onFeedback={(t) => {
+                        setFeedbackTask(t);
+                        setFeedbackOpen(true);
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="w-8 h-8 text-gray-400" />
                   </div>
-                ) : (
-                  <div className="text-center py-16">
-                    <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Sparkles className="w-8 h-8 text-gray-300" />
-                    </div>
-                    <p className="text-gray-500 font-medium">All clear! No open tasks right now.</p>
-                  </div>
-                )}
-              </div>
+                  <p className="text-gray-600 font-normal">All clear! No open tasks right now.</p>
+                </div>
+              )}
             </div>
           </section>
 
-          {/* Section 2: Vertical Breakdowns */}
+          {/* Section 2: Vertical Breakdowns - Google Material Design */}
           <section>
-             <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-white rounded-full shadow-sm border border-gray-100 text-[#EA4335]">
-                <LayoutGrid className="w-6 h-6" />
+             <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 bg-white rounded-lg shadow-sm border border-gray-200 text-[#EA4335]">
+                <LayoutGrid className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-[#202124]">Vertical Tracks</h2>
-                <p className="text-sm text-gray-500">Specific tasks assigned to departments</p>
+                <h2 className="text-xl font-medium text-[#202124]">Vertical Tracks</h2>
+                <p className="text-sm text-gray-600">Specific tasks assigned to departments</p>
               </div>
             </div>
 
-            <div className="space-y-10">
+            <div className="space-y-8">
               {dashboardVerticals.map((vertical) => {
                 const verticalTasks = tasksByVertical[vertical];
                 const theme = getVerticalTheme(vertical);
@@ -180,28 +135,25 @@ const Dashboard = () => {
 
                 return (
                   <div key={vertical} className="animate-fade-in">
-                    {/* Vertical Header */}
-                    <div className="flex items-center gap-4 mb-5 border-b border-gray-100 pb-2">
-                      <div className={`px-4 py-1.5 rounded-full text-sm font-bold border ${theme.border} ${theme.bg} ${theme.text} flex items-center gap-2`}>
+                    {/* Vertical Header - Google Material Design */}
+                    <div className="flex items-center gap-4 mb-5 pb-3 border-b border-gray-200">
+                      <div className={`px-3 py-1 rounded-md text-sm font-medium border ${theme.border} ${theme.bg} ${theme.text} flex items-center gap-2`}>
                         {getVerticalDisplayName(vertical)}
-                        <span className="w-1 h-1 rounded-full bg-current opacity-60" />
-                        <span>{verticalTasks.length}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-white/50 text-xs font-medium">{verticalTasks.length}</span>
                       </div>
-                      <div className="h-[1px] flex-1 bg-gray-100" />
                     </div>
 
                     {/* Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                       {verticalTasks.map((task) => (
-                        <div key={task.id} className="transition-transform duration-200 hover:-translate-y-1">
-                           <TaskCard
-                            task={task}
-                            onFeedback={(t) => {
-                              setFeedbackTask(t);
-                              setFeedbackOpen(true);
-                            }}
-                          />
-                        </div>
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          onFeedback={(t) => {
+                            setFeedbackTask(t);
+                            setFeedbackOpen(true);
+                          }}
+                        />
                       ))}
                     </div>
                   </div>
@@ -210,9 +162,9 @@ const Dashboard = () => {
 
                {/* Empty State for Verticals */}
                {dashboardVerticals.every((v) => tasksByVertical[v].length === 0) && (
-                <div className="border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center bg-gray-50/50 backdrop-blur-sm">
-                  <ClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-gray-500">No active vertical tracks at the moment.</p>
+                <div className="border border-dashed border-gray-300 rounded-lg p-12 text-center bg-white">
+                  <ClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                  <p className="text-gray-600">No active vertical tracks at the moment.</p>
                 </div>
               )}
             </div>
