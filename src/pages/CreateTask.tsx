@@ -103,6 +103,9 @@ const CreateTask = () => {
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             className="bg-secondary/50"
           />
+          <p className="text-xs text-muted-foreground">
+            Select the vertical this task belongs to
+          </p>
         </div>
 
         {/* Description */}
@@ -119,7 +122,7 @@ const CreateTask = () => {
 
         {/* Vertical */}
         <div className="space-y-2">
-          <Label>Assign To *</Label>
+          <Label>Vertical *</Label>
           <Select
             value={formData.vertical}
             onValueChange={(value) => setFormData({ ...formData, vertical: value })}
@@ -138,10 +141,10 @@ const CreateTask = () => {
           </Select>
         </div>
 
-        {/* Rating, Deadline & Estimated Time Row */}
+        {/* Priority, Deadline & Estimated Time Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label>Rating</Label>
+            <Label>Priority</Label>
             <Popover open={ratingPopoverOpen} onOpenChange={setRatingPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -174,7 +177,7 @@ const CreateTask = () => {
                       ))}
                     </div>
                   ) : (
-                    <span>Select ratings (1-5 stars)</span>
+                    <span>Select priority (1-5 stars)</span>
                   )}
                   <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -242,7 +245,7 @@ const CreateTask = () => {
             </Popover>
             {selectedRatings.length > 0 && (
               <p className="text-xs text-muted-foreground">
-                {selectedRatings.length} rating{selectedRatings.length > 1 ? 's' : ''} selected
+                {selectedRatings.length} priority{selectedRatings.length > 1 ? 's' : ''} selected
               </p>
             )}
           </div>
