@@ -1,5 +1,5 @@
 import { Clock, Paperclip, User, MessageSquare, UserCircle } from 'lucide-react';
-import { Task } from '@/data/dummyData';
+import { Task } from '@/data/types';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { PriorityBadge } from '@/components/ui/priority-badge';
 import { Progress } from '@/components/ui/progress';

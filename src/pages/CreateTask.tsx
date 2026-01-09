@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X, Star, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,10 +18,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { verticals, TaskStatus, Priority } from '@/data/dummyData';
+import { verticals, TaskStatus, Priority } from '@/data/types';
 import { useTasks } from '@/contexts/TasksContext';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { createTaskInSheet } from "@/services/googleSheet";
 
 const CreateTask = () => {
   const navigate = useNavigate();
@@ -30,17 +31,17 @@ const CreateTask = () => {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [ratingPopoverOpen, setRatingPopoverOpen] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    vertical: '',
-    deadline: '',
-    estimatedTime: '',
+    TaskTitle: '',
+    Description: '',
+    Vertical: '',
+    Deadline: '',
+    EstimatedTime: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.vertical || !formData.deadline) {
+    if (!formData.TaskTitle || !formData.Vertical || !formData.Deadline) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields.",
@@ -49,26 +50,44 @@ const CreateTask = () => {
       return;
     }
 
-    // Add the new task
-    // deadline will be formatted in TasksContext
-    addTask({
-      title: formData.title,
-      description: formData.description || '',
-      vertical: formData.vertical as any,
-      assignedTo: null, // Ensure it's unassigned
-      status: 'Allocated' as TaskStatus,
-      priority: 'Medium' as Priority, // Default priority
-      deadline: formData.deadline, // Pass the date string (YYYY-MM-DD format)
-      estimatedTime: formData.estimatedTime || '',
-      rating: selectedRatings.length > 0 ? selectedRatings[0] : undefined, // Use first selected rating or undefined
-    });
+    try {
+      // ✅ SEND TO GOOGLE SHEET
+      await createTaskInSheet({
+        TaskTitle : formData.TaskTitle,
+        Description: formData.Description,
+        Vertical: formData.Vertical,
+        Priority: selectedRatings[0],
+        Deadline: formData.Deadline,
+        EstimatedTime: formData.EstimatedTime,
+        Status: "Allocated",
+      });     
 
-    toast({
-      title: "Task Created!",
-      description: `"${formData.title}" has been created successfully and appears as unassigned.`,
-    });
+      // (Optional) update local context
+      addTask({
+        title: formData.TaskTitle,
+        description: formData.Description,
+        vertical: formData.Vertical as any,
+        assignedTo: null,
+        status: "Allocated" as TaskStatus,
+        priority: "Medium" as Priority,
+        deadline: formData.Deadline,
+        estimatedTime: formData.EstimatedTime,
+        rating: selectedRatings[0],
+      });
 
-    navigate('/tasks');
+      toast({
+        title: "Task Created!",
+        description: `"${formData.TaskTitle}" has been saved to Google Sheet.`,
+      });
+
+      navigate("/tasks");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save task. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFileAdd = () => {
@@ -99,8 +118,8 @@ const CreateTask = () => {
           <Input
             id="title"
             placeholder="Enter task title..."
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            value={formData.TaskTitle}
+            onChange={(e) => setFormData({ ...formData, TaskTitle : e.target.value })}
             className="bg-secondary/50"
           />
           <p className="text-xs text-muted-foreground">
@@ -114,8 +133,8 @@ const CreateTask = () => {
           <Textarea
             id="description"
             placeholder="Describe the task in detail..."
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            value={formData.Description}
+            onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
             className="bg-secondary/50 min-h-[120px]"
           />
         </div>
@@ -124,8 +143,8 @@ const CreateTask = () => {
         <div className="space-y-2">
           <Label>Vertical *</Label>
           <Select
-            value={formData.vertical}
-            onValueChange={(value) => setFormData({ ...formData, vertical: value })}
+            value={formData.Vertical}
+            onValueChange={(value) => setFormData({ ...formData, Vertical: value })}
           >
             <SelectTrigger className="bg-secondary/50">
               <SelectValue placeholder="Select vertical" />
@@ -189,20 +208,16 @@ const CreateTask = () => {
                       key={rating}
                       className="flex items-center space-x-2 p-2 rounded-md hover:bg-secondary/50 cursor-pointer"
                       onClick={() => {
-                        setSelectedRatings((prev) =>
-                          prev.includes(rating)
-                            ? prev.filter((r) => r !== rating)
-                            : [...prev, rating]
-                        );
+                        setSelectedRatings([rating]);
                       }}
                     >
                       <Checkbox
                         checked={selectedRatings.includes(rating)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedRatings((prev) => [...prev, rating]);
+                            setSelectedRatings([rating]);
                           } else {
-                            setSelectedRatings((prev) => prev.filter((r) => r !== rating));
+                            setSelectedRatings([]); // Allow deselecting
                           }
                         }}
                       />
@@ -251,12 +266,12 @@ const CreateTask = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="deadline">Deadline *</Label>
+            <Label htmlFor="Deadline">Deadline *</Label>
             <Input
-              id="deadline"
+              id="Deadline"
               type="date"
-              value={formData.deadline}
-              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+              value={formData.Deadline}
+              onChange={(e) => setFormData({ ...formData, Deadline: e.target.value })}
               className="bg-secondary/50"
             />
           </div>
@@ -266,8 +281,8 @@ const CreateTask = () => {
             <Input
               id="estimatedTime"
               placeholder="e.g., 4 hours"
-              value={formData.estimatedTime}
-              onChange={(e) => setFormData({ ...formData, estimatedTime: e.target.value })}
+              value={formData.EstimatedTime}
+              onChange={(e) => setFormData({ ...formData, EstimatedTime: e.target.value })}
               className="bg-secondary/50"
             />
           </div>

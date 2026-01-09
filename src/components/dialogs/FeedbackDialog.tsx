@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Task } from '@/data/dummyData';
+import { Task } from '@/data/types';
 import { StarRating } from '@/components/ui/star-rating';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity } from '@/data/dummyData';
+import { Activity } from '@/data/types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 

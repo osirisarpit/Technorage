@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Task } from '@/data/dummyData';
-import { tasks as initialTasks } from '@/data/dummyData';
+import { Task } from '@/data/types';
 
 interface TasksContextType {
   tasks: Task[];
@@ -16,7 +15,7 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Load tasks from localStorage or use initial dummy data
+    // Load tasks from localStorage
     const storedTasks = localStorage.getItem('tasks');
     if (storedTasks) {
       try {
@@ -29,10 +28,10 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
         setTasks(tasksWithDates);
       } catch (error) {
         console.error('Error parsing tasks data:', error);
-        setTasks(initialTasks);
+        setTasks([]);
       }
     } else {
-      setTasks(initialTasks);
+      setTasks([]);
     }
     setIsInitialized(true);
   }, []);

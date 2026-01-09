@@ -1,4 +1,4 @@
-import { Member } from '@/data/dummyData';
+import { Member } from '@/data/types';
 import { StarRating } from '@/components/ui/star-rating';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { verticals, Task, TaskStatus } from '@/data/dummyData';
+import { verticals, Task, TaskStatus } from '@/data/types';
 import { useTasks } from '@/contexts/TasksContext';
 import { TaskCard } from '@/components/cards/TaskCard';
 import { FeedbackDialog } from '@/components/dialogs/FeedbackDialog';

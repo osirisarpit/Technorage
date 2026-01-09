@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { TaskStatus, getStatusColor } from '@/data/dummyData';
+import { TaskStatus, getStatusColor } from '@/data/types';
 
 interface StatusBadgeProps {
   status: TaskStatus;

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MessageSquare, CheckCircle2, RotateCcw, Star } from 'lucide-react';
-import { tasks, Task } from '@/data/dummyData';
+import { Task } from '@/data/types';
+import { useTasks } from '@/contexts/TasksContext';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { StarRating } from '@/components/ui/star-rating';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,8 @@ const FeedbackHub = () => {
   const [feedbackTask, setFeedbackTask] = useState<Task | null>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
+  const { tasks } = useTasks();
+  
   // Tasks that need review
   const reviewTasks = tasks.filter(
     (t) => t.status === 'Under Review' || t.status === 'Completed'

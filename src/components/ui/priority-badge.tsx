@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Priority, getPriorityColor } from '@/data/dummyData';
+import { Priority, getPriorityColor } from '@/data/types';
 
 interface PriorityBadgeProps {
   priority: Priority;
