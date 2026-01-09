@@ -9,9 +9,7 @@ import {
   Sparkles, 
   Settings,
   ChevronLeft,
-  ChevronRight,
-  Moon,
-  Sun
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,8 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
-  isDarkMode: boolean;
-  onThemeToggle: () => void;
+
 }
 
 interface NavItem {
@@ -33,26 +30,36 @@ interface NavItem {
 const allNavItems: NavItem[] = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard', roles: ['lead', 'member'] },
   { path: '/create-task', icon: PlusCircle, label: 'Create Task', roles: ['lead'] },
-  { path: '/members', icon: Users, label: 'Member List', roles: ['lead'] },
-  { path: '/tasks', icon: ClipboardList, label: 'Tasks', roles: ['lead', 'member'] },
-  { path: '/feedback', icon: MessageSquare, label: 'Feedback Hub', roles: ['lead'] },
-  { path: '/suggestions', icon: Sparkles, label: 'Smart Suggestions', roles: ['lead'] },
+  { path: '/tasks', icon: ClipboardList, label: 'Task Room', roles: ['member'] },
+  { path: '/tasks', icon: ClipboardList, label: 'Tasks', roles: ['lead'] },
   { path: '/settings', icon: Settings, label: 'Settings', roles: ['lead', 'member'] },
 ];
 
-export const Sidebar = ({ collapsed, onToggle, isDarkMode, onThemeToggle }: SidebarProps) => {
+export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const location = useLocation();
   const { user } = useAuth();
 
-  // Filter nav items based on user role
-  const navItems = allNavItems.filter(item => 
-    user && item.roles.includes(user.role)
-  );
+  // Filter nav items based on user role and adjust paths/labels
+  const navItems = allNavItems
+    .filter(item => user && item.roles.includes(user.role))
+    .map(item => {
+      // Adjust path for dashboard based on user role
+      if (item.path === '/' && user?.role === 'member') {
+        return { ...item, path: '/member-dashboard' };
+      } else if (item.path === '/' && user?.role === 'lead') {
+        return { ...item, path: '/lead-dashboard' };
+      }
+      // Adjust label for tasks based on user role
+      else if (item.path === '/tasks' && user?.role === 'member') {
+        return { ...item, label: 'Tasks' };
+      }
+      return item;
+    });
 
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-0 h-full bg-sidebar border-r border-sidebar-border z-40 transition-all duration-300 flex flex-col",
+        "fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40 transition-all duration-300 flex flex-col",
         collapsed ? "w-20" : "w-64"
       )}
     >
@@ -110,22 +117,7 @@ export const Sidebar = ({ collapsed, onToggle, isDarkMode, onThemeToggle }: Side
 
       {/* Bottom Section */}
       <div className="p-3 border-t border-sidebar-border space-y-2">
-        {/* Theme Toggle */}
-        <button
-          onClick={onThemeToggle}
-          className="sidebar-item w-full justify-center"
-        >
-          {isDarkMode ? (
-            <Sun className="w-5 h-5 text-google-yellow" />
-          ) : (
-            <Moon className="w-5 h-5 text-muted-foreground" />
-          )}
-          {!collapsed && (
-            <span className="animate-fade-in">
-              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-            </span>
-          )}
-        </button>
+
 
         {/* Collapse Toggle */}
         <button

@@ -4,6 +4,13 @@ import { Shield, Users, Mail, Lock, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -15,8 +22,8 @@ const Login = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<UserRole>('lead');
-  const [leadForm, setLeadForm] = useState({ email: '', password: '' });
-  const [memberForm, setMemberForm] = useState({ email: '', password: '' });
+  const [leadForm, setLeadForm] = useState({ name: '', email: '', password: '', vertical: '' });
+  const [memberForm, setMemberForm] = useState({ name: '', email: '', password: '', vertical: '' });
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already authenticated
@@ -33,12 +40,12 @@ const Login = () => {
 
     // Simulate API call
     setTimeout(() => {
-      if (form.email && form.password) {
+      if (form.email && form.password && form.name && form.vertical) {
         login({
           role: role,
           email: form.email,
-          name: role === 'lead' ? 'Aditya Kumar' : 'Priya Verma',
-          vertical: role === 'lead' ? 'Design' : 'Tech'
+          name: form.name,
+          vertical: form.vertical
         });
         
         toast({
@@ -47,7 +54,12 @@ const Login = () => {
           className: "border-l-4 border-[#4285F4]" // Google Blue accent
         });
         
-        navigate('/');
+        // Redirect to appropriate dashboard based on role
+        if (role === 'lead') {
+          navigate('/lead-dashboard');
+        } else {
+          navigate('/member-dashboard');
+        }
         setIsLoading(false);
       } else {
         toast({
@@ -177,6 +189,78 @@ const Login = () => {
                     <TabsContent key={role} value={role} className="space-y-5 focus-visible:outline-none focus-visible:ring-0">
                         <form onSubmit={(e) => handleLogin(e, role as UserRole)} className="space-y-4">
                         <div className="space-y-2">
+                            <Label htmlFor={`${role}-name`} className="text-gray-700 font-medium">Full Name</Label>
+                            <div className="relative group">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <Input
+                                id={`${role}-name`}
+                                type="text"
+                                placeholder="Enter your full name"
+                                value={role === 'lead' ? leadForm.name : memberForm.name}
+                                onChange={(e) => role === 'lead' 
+                                    ? setLeadForm({ ...leadForm, name: e.target.value })
+                                    : setMemberForm({ ...memberForm, name: e.target.value })
+                                }
+                                className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
+                                required
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
+                                onClick={() => {
+                                    if (role === 'lead') {
+                                        setLeadForm({
+                                            ...leadForm,
+                                            name: 'John Smith',
+                                            email: 'john@gdg.dev',
+                                            vertical: 'Design'
+                                        });
+                                    } else {
+                                        setMemberForm({
+                                            ...memberForm,
+                                            name: 'Jane Doe',
+                                            email: 'jane@gdg.dev',
+                                            vertical: 'Tech'
+                                        });
+                                    }
+                                }}
+                            >
+                                Demo
+                            </Button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Vertical</Label>
+                            <Select
+                                value={role === 'lead' ? leadForm.vertical : memberForm.vertical}
+                                onValueChange={(value) => role === 'lead' 
+                                    ? setLeadForm({ ...leadForm, vertical: value })
+                                    : setMemberForm({ ...memberForm, vertical: value })
+                                }
+                                required
+                            >
+                                <SelectTrigger className="bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900">
+                                    <SelectValue placeholder="Select your vertical" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Overall Club">Overall Club</SelectItem>
+                                    <SelectItem value="Operations">Operations</SelectItem>
+                                    <SelectItem value="PR">PR</SelectItem>
+                                    <SelectItem value="Design">Design</SelectItem>
+                                    <SelectItem value="Tech">Tech</SelectItem>
+                                    <SelectItem value="Marketing">Marketing</SelectItem>
+                                    <SelectItem value="Social Media">Social Media</SelectItem>
+                                    <SelectItem value="Content">Content</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
                             <Label htmlFor={`${role}-email`} className="text-gray-700 font-medium">Email Address</Label>
                             <div className="relative group">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors" />
@@ -192,6 +276,29 @@ const Login = () => {
                                 className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
                                 required
                             />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
+                                onClick={() => {
+                                    if (role === 'lead') {
+                                        setLeadForm({
+                                            ...leadForm,
+                                            email: 'john@gdg.dev',
+                                            password: 'password123'
+                                        });
+                                    } else {
+                                        setMemberForm({
+                                            ...memberForm,
+                                            email: 'jane@gdg.dev',
+                                            password: 'password123'
+                                        });
+                                    }
+                                }}
+                            >
+                                Demo
+                            </Button>
                             </div>
                         </div>
 
@@ -211,6 +318,27 @@ const Login = () => {
                                 className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
                                 required
                             />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
+                                onClick={() => {
+                                    if (role === 'lead') {
+                                        setLeadForm({
+                                            ...leadForm,
+                                            password: 'password123'
+                                        });
+                                    } else {
+                                        setMemberForm({
+                                            ...memberForm,
+                                            password: 'password123'
+                                        });
+                                    }
+                                }}
+                            >
+                                Demo
+                            </Button>
                             </div>
                         </div>
 

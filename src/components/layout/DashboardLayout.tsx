@@ -7,35 +7,24 @@ import { cn } from '@/lib/utils';
 
 export const DashboardLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.remove('light');
-    } else {
-      document.documentElement.classList.add('light');
-    }
-  }, [isDarkMode]);
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-        isDarkMode={isDarkMode}
-        onThemeToggle={() => setIsDarkMode(!isDarkMode)}
       />
 
       <div
         className={cn(
-          "transition-all duration-300 bg-gray-50",
+          "transition-all duration-300 bg-white",
           sidebarCollapsed ? "ml-20" : "ml-64"
         )}
       >
         <Header currentVertical="Design" />
 
-        <main className="p-6 bg-gray-50 min-h-screen">
+        <main className="p-6 bg-white min-h-screen">
           <Outlet />
         </main>
       </div>

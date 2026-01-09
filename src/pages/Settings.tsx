@@ -3,8 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Settings = () => {
+  const { user } = useAuth();
+  
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       {/* Page Header */}
@@ -26,12 +29,14 @@ const Settings = () => {
 
         <div className="flex items-center gap-6">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-google-blue to-google-green flex items-center justify-center">
-            <span className="text-foreground font-bold text-2xl">AK</span>
+            <span className="text-foreground font-bold text-2xl">
+              {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+            </span>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground">Aditya Kumar</h3>
-            <p className="text-muted-foreground">Design Lead</p>
-            <p className="text-sm text-muted-foreground mt-1">aditya@gdg.dev</p>
+            <h3 className="text-xl font-semibold text-foreground">{user?.name || 'User'}</h3>
+            <p className="text-muted-foreground">{user?.role === 'lead' ? `${user?.vertical} Lead` : user?.vertical || 'Member'}</p>
+            <p className="text-sm text-muted-foreground mt-1">{user?.email || 'user@example.com'}</p>
           </div>
           <Button variant="outline" className="ml-auto">
             Edit Profile

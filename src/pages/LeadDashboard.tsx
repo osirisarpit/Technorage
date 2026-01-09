@@ -30,16 +30,10 @@ const getVerticalTheme = (vertical: string) => {
   }
 };
 
-const Dashboard = () => {
+const LeadDashboard = () => {
   const { user } = useAuth();
   const { tasks } = useTasks();
-
-
-  // Open for all tasks
-  const openForAllTasks = tasks.filter(
-    (task) => task.assignedTo === null || task.vertical === 'Overall Club'
-  );
-
+  
   // Group tasks by vertical
   const tasksByVertical = dashboardVerticals.reduce((acc, vertical) => {
     acc[vertical] = tasks.filter((task) => task.vertical === vertical);
@@ -59,56 +53,18 @@ const Dashboard = () => {
                 <span className="w-2 h-2 rounded-full bg-[#FBBC04]"></span>
                 <span className="w-2 h-2 rounded-full bg-[#34A853]"></span>
              </div>
-             <span className="text-xs font-medium text-gray-500 tracking-wider uppercase">Dashboard</span>
+             <span className="text-xs font-medium text-gray-500 tracking-wider uppercase">Lead Dashboard</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-[#202124] mb-2">
-            Hello, <span className="font-medium text-[#4285F4]">{user?.name || 'Developer'}</span>
+            Hello, <span className="font-medium text-[#4285F4]">{user?.name || 'Lead'}</span>
           </h1>
           <p className="text-base text-gray-600 max-w-2xl">
-            {user?.role === 'lead' 
-              ? "Oversee community progress and manage vertical assignments."
-              : "Let's build something amazing together. Check your tasks below."
-            }
+            Oversee community progress and manage vertical assignments.
           </p>
         </header>
 
         <div className="space-y-12">
           
-          {/* Section 1: Open Opportunities (Open for All) - Google Material Design */}
-          <section className="mb-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-white rounded-lg shadow-sm border border-gray-200 text-[#4285F4]">
-                <Globe className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-medium text-[#202124]">Open Opportunities</h2>
-                <p className="text-sm text-gray-600">Tasks available for the entire community</p>
-              </div>
-            </div>
-
-            {/* Clean Container for "Open" Tasks */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-              {openForAllTasks.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {openForAllTasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-16">
-                  <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Sparkles className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-600 font-normal">All clear! No open tasks right now.</p>
-                </div>
-              )}
-            </div>
-          </section>
-
           {/* Section 2: Vertical Breakdowns - Google Material Design */}
           <section>
              <div className="flex items-center gap-3 mb-6">
@@ -144,7 +100,6 @@ const Dashboard = () => {
                         <TaskCard
                           key={task.id}
                           task={task}
-    
                         />
                       ))}
                     </div>
@@ -163,10 +118,8 @@ const Dashboard = () => {
           </section>
         </div>
       </div>
-
-
     </div>
   );
 };
 
-export default Dashboard;
+export default LeadDashboard;

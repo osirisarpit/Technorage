@@ -10,12 +10,14 @@ import { RoleProtectedRoute } from "@/components/RoleProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import MemberDashboard from "@/pages/MemberDashboard";
+import LeadDashboard from "@/pages/LeadDashboard";
+import RootRedirect from "@/components/RootRedirect";
 import CreateTask from "@/pages/CreateTask";
 import MemberList from "@/pages/MemberList";
 import AssignedTasks from "@/pages/AssignedTasks";
 import Tasks from "@/pages/Tasks";
-import FeedbackHub from "@/pages/FeedbackHub";
-import SmartSuggestions from "@/pages/SmartSuggestions";
+
 import Settings from "@/pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -38,8 +40,10 @@ const App = () => (
                 </ProtectedRoute>
               }
             >
-              {/* Available to both Lead and Member */}
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/member-dashboard" element={<MemberDashboard />} />
+              <Route path="/lead-dashboard" element={<LeadDashboard />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/assigned-tasks" element={<AssignedTasks />} />
               <Route path="/settings" element={<Settings />} />
@@ -53,30 +57,7 @@ const App = () => (
                   </RoleProtectedRoute>
                 }
               />
-              <Route
-                path="/members"
-                element={
-                  <RoleProtectedRoute allowedRoles={['lead']}>
-                    <MemberList />
-                  </RoleProtectedRoute>
-                }
-              />
-              <Route
-                path="/feedback"
-                element={
-                  <RoleProtectedRoute allowedRoles={['lead']}>
-                    <FeedbackHub />
-                  </RoleProtectedRoute>
-                }
-              />
-              <Route
-                path="/suggestions"
-                element={
-                  <RoleProtectedRoute allowedRoles={['lead']}>
-                    <SmartSuggestions />
-                  </RoleProtectedRoute>
-                }
-              />
+
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
