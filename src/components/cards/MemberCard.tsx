@@ -1,5 +1,5 @@
 import { Clock, ClipboardList } from 'lucide-react';
-import { Member } from '@/data/dummyData';
+import { Member } from '@/data/types';
 import { StarRating } from '@/components/ui/star-rating';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';

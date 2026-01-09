@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { verticals, Task, TaskStatus } from '@/data/dummyData';
+import { verticals, Task, TaskStatus } from '@/data/types';
 import { useTasks } from '@/contexts/TasksContext';
 import { TaskCard } from '@/components/cards/TaskCard';
 

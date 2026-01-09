@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Member, tasks } from '@/data/dummyData';
+import { Member } from '@/data/types';
+import { useTasks } from '@/contexts/TasksContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -33,6 +34,7 @@ export const AssignTaskDialog = ({
 
   if (!member) return null;
 
+  const { tasks, updateTask } = useTasks();
   const unassignedTasks = tasks.filter(task => !task.assignedTo || task.status === 'Allocated');
 
   const handleAssign = () => {
@@ -46,10 +48,20 @@ export const AssignTaskDialog = ({
     }
 
     const task = tasks.find(t => t.id === selectedTask);
-    toast({
-      title: "Task Assigned!",
-      description: `"${task?.title}" assigned to ${member.name}`,
-    });
+    
+    if (task && selectedTask) {
+      // Update the task with the assigned member
+      updateTask(selectedTask, {
+        assignedTo: member.id,
+        assignedToName: member.name,
+        status: 'Working'
+      });
+      
+      toast({
+        title: "Task Assigned!",
+        description: `"${task?.title}" assigned to ${member.name}`,
+      });
+    }
 
     setSelectedTask('');
     onOpenChange(false);

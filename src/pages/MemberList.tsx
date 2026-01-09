@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { members, verticals, Member } from '@/data/dummyData';
+import { verticals, Member } from '@/data/types';
 import { MemberCard } from '@/components/cards/MemberCard';
 import { MemberProfileDialog } from '@/components/dialogs/MemberProfileDialog';
 import { AssignTaskDialog } from '@/components/dialogs/AssignTaskDialog';
@@ -21,6 +21,80 @@ const MemberList = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignMember, setAssignMember] = useState<Member | null>(null);
+  
+  // Mock data for members
+  const [members] = useState<Member[]>([
+    {
+      id: '1',
+      name: 'Riya Sharma',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=riya',
+      role: 'Senior Designer',
+      vertical: 'Design',
+      lastSeen: '5 mins ago',
+      lastSeenDate: new Date(Date.now() - 5 * 60000),
+      assignedTasks: 3,
+      rating: 4.8,
+      completedTasks: 24,
+      email: 'riya@gdg.dev',
+      joinDate: 'Aug 2024'
+    },
+    {
+      id: '2',
+      name: 'Ayush Patel',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ayush',
+      role: 'PR Lead',
+      vertical: 'PR',
+      lastSeen: '1 hour ago',
+      lastSeenDate: new Date(Date.now() - 60 * 60000),
+      assignedTasks: 2,
+      rating: 4.5,
+      completedTasks: 18,
+      email: 'ayush@gdg.dev',
+      joinDate: 'Sep 2024'
+    },
+    {
+      id: '3',
+      name: 'Priya Verma',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=priya',
+      role: 'Tech Developer',
+      vertical: 'Tech',
+      lastSeen: '30 mins ago',
+      lastSeenDate: new Date(Date.now() - 30 * 60000),
+      assignedTasks: 4,
+      rating: 4.9,
+      completedTasks: 31,
+      email: 'priya@gdg.dev',
+      joinDate: 'Jul 2024'
+    },
+    {
+      id: '4',
+      name: 'Karan Singh',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=karan',
+      role: 'Marketing Specialist',
+      vertical: 'Marketing',
+      lastSeen: 'Yesterday',
+      lastSeenDate: new Date(Date.now() - 24 * 60 * 60000),
+      assignedTasks: 1,
+      rating: 4.2,
+      completedTasks: 12,
+      email: 'karan@gdg.dev',
+      joinDate: 'Oct 2024'
+    },
+    {
+      id: '5',
+      name: 'Sneha Gupta',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sneha',
+      role: 'Content Writer',
+      vertical: 'Content',
+      lastSeen: '2 hours ago',
+      lastSeenDate: new Date(Date.now() - 2 * 60 * 60000),
+      assignedTasks: 2,
+      rating: 4.6,
+      completedTasks: 20,
+      email: 'sneha@gdg.dev',
+      joinDate: 'Aug 2024'
+    },
+  ]);
 
   const filteredMembers = members.filter((member) => {
     const matchesSearch = member.name.toLowerCase().includes(search.toLowerCase()) ||

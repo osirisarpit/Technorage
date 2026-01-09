@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ClipboardList, Globe, LayoutGrid, Sparkles } from 'lucide-react';
-import { Task } from '@/data/dummyData';
+import { Task } from '@/data/types';
 import { useTasks } from '@/contexts/TasksContext';
 import { TaskCard } from '@/components/cards/TaskCard';
 import { useAuth } from '@/contexts/AuthContext';

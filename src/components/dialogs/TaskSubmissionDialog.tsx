@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, X, File, CheckCircle2, Loader2 } from 'lucide-react';
-import { Task } from '@/data/dummyData';
+import { Task } from '@/data/types';
 import {
   Dialog,
   DialogContent,
