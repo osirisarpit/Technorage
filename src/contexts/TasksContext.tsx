@@ -28,10 +28,16 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
         setTasks(tasksWithDates);
       } catch (error) {
         console.error('Error parsing tasks data:', error);
+        // If there's an error parsing, load dummy data
         setTasks([]);
       }
     } else {
-      setTasks([]);
+      // Initialize with dummy data if no tasks in localStorage
+      import('@/data/dummyData').then((module) => {
+        setTasks(module.tasks);
+      }).catch(() => {
+        setTasks([]);
+      });
     }
     setIsInitialized(true);
   }, []);
