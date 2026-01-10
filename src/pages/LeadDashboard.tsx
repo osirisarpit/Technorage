@@ -65,6 +65,40 @@ const LeadDashboard = () => {
 
         <div className="space-y-12">
           
+          {/* Section 1: Open Opportunities (Open for All) - Google Material Design */}
+          <section className="mb-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 bg-white rounded-lg shadow-sm border border-gray-200 text-[#4285F4]">
+                <Globe className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-medium text-[#202124]">Open Opportunities</h2>
+                <p className="text-sm text-gray-600">Tasks available for the entire community</p>
+              </div>
+            </div>
+
+            {/* Clean Container for "Open" Tasks */}
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              {tasks.filter(task => task.assignedTo === null || task.vertical === 'Overall Club').length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {tasks.filter(task => task.assignedTo === null || task.vertical === 'Overall Club').map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-600 font-normal">All clear! No open tasks right now.</p>
+                </div>
+              )}
+            </div>
+          </section>
+
           {/* Section 2: Vertical Breakdowns - Google Material Design */}
           <section>
              <div className="flex items-center gap-3 mb-6">

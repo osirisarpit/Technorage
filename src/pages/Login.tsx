@@ -369,8 +369,8 @@ const Login = () => {
                 </Select>
               </div>
 
-              {/* Single Login Form */}
-              <form onSubmit={(e) => handleLogin(e, role)} className="space-y-4">
+              {/* Single Signup Form */}
+              <form onSubmit={(e) => handleRegister(e, role)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-gray-700 font-medium">Full Name</Label>
                   <div className="relative group">
@@ -489,29 +489,15 @@ const Login = () => {
                   </div>
                 </div>
 
-                <Button
-                  type="submit"
-                  className={`w-full h-11 text-base font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mt-2
-                    ${role === 'lead' 
-                      ? 'bg-[#4285F4] hover:bg-[#3367D6] shadow-[#4285F4]/20' 
-                      : 'bg-[#34A853] hover:bg-[#2D9249] shadow-[#34A853]/20'
-                    }`}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    'Signing in...'
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      Sign in as {role.charAt(0).toUpperCase() + role.slice(1)} <ChevronRight className="w-4 h-4" />
-                    </span>
-                  )}
-                </Button>
-                
-                {/* Google Signup buttons */}
+                {/* Colorful Signup Button */}
                 <Button
                   type="button"
-                  variant="outline"
-                  className="w-full h-11 text-base font-medium rounded-xl mt-2 border-gray-300 hover:bg-gray-50 text-gray-700"
+                  variant="default"
+                  className={`w-full h-11 text-base font-medium rounded-xl mt-2 shadow-lg hover:shadow-xl transition-all duration-300
+                    ${role === 'lead' 
+                      ? 'bg-gradient-to-r from-[#4285F4] to-[#3367D6] hover:from-[#3367D6] hover:to-[#1a4780] text-white' 
+                      : 'bg-gradient-to-r from-[#34A853] to-[#188038] hover:from-[#188038] hover:to-[#0d4721] text-white'
+                    }`}
                   disabled={isLoading}
                   onClick={(e) => {
                     e.preventDefault();
