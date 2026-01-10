@@ -1,17 +1,32 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { 
+  auth, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged, 
+  FirebaseUser,
+  createUserWithEmailAndPassword
+} from '@/lib/firebase';
+import { 
+  createUserProfile, 
+  getUserProfile, 
+  UserProfile 
+} from '@/services/userService';
 
 interface User {
   role: 'lead' | 'member';
   email: string;
   name: string;
   vertical: string;
+  uid: string; // Firebase user ID
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (userData: User) => void;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, userData: Omit<User, 'uid'>) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -22,28 +37,122 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored auth on mount
-    const storedAuth = localStorage.getItem('auth');
-    if (storedAuth) {
-      try {
-        const userData = JSON.parse(storedAuth);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing auth data:', error);
-        localStorage.removeItem('auth');
+    // Set up Firebase auth state listener
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // Get user profile from Firestore
+          const userProfile = await getUserProfile(firebaseUser.uid);
+          if (userProfile) {
+            setUser({
+              uid: userProfile.uid,
+              email: userProfile.email,
+              name: userProfile.name,
+              role: userProfile.role,
+              vertical: userProfile.vertical
+            });
+          } else {
+            // If no profile exists in Firestore, create a minimal user object
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: firebaseUser.displayName || 'User',
+              role: 'member', // Default role
+              vertical: ''
+            });
+          }
+        } catch (error) {
+          console.error('Error getting user profile:', error);
+          // Fallback to minimal user data
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            name: firebaseUser.displayName || 'User',
+            role: 'member', // Default role
+            vertical: ''
+          });
+        }
+      } else {
+        setUser(null);
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    });
+
+    // Clean up subscription on unmount
+    return () => unsubscribe();
   }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('auth', JSON.stringify(userData));
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Get user profile from Firestore
+      const userProfile = await getUserProfile(firebaseUser.uid);
+      if (userProfile) {
+        setUser({
+          uid: userProfile.uid,
+          email: userProfile.email,
+          name: userProfile.name,
+          role: userProfile.role,
+          vertical: userProfile.vertical
+        });
+      } else {
+        // If no profile exists in Firestore, create a minimal user object
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          name: firebaseUser.displayName || 'User',
+          role: 'member', // Default role
+          vertical: ''
+        });
+      }
+    } catch (error: any) {
+      setIsLoading(false);
+      // Re-throw the error so it can be handled by the calling component
+      throw error;
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('auth');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      // Note: setUser(null) is handled by the onAuthStateChanged listener
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+  };
+
+  const register = async (email: string, password: string, userData: Omit<User, 'uid'>) => {
+    setIsLoading(true);
+    try {
+      // Create a new user with email and password
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Create user profile in Firestore
+      await createUserProfile(firebaseUser, {
+        name: userData.name,
+        role: userData.role,
+        vertical: userData.vertical
+      });
+      
+      // Set user in context
+      setUser({
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        name: userData.name,
+        role: userData.role,
+        vertical: userData.vertical
+      });
+      setIsLoading(false);
+    } catch (error: any) {
+      setIsLoading(false);
+      console.error('Registration error:', error);
+      throw error;
+    }
   };
 
   return (
@@ -53,6 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: !!user,
         login,
         logout,
+        register,
         isLoading,
       }}
     >
@@ -68,4 +178,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

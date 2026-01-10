@@ -60,7 +60,7 @@ const CreateTask = () => {
         Priority: selectedRatings[0],
         Deadline: formData.Deadline,
         EstimatedTime: formData.EstimatedTime,
-        Status: "Allocated",
+        Status: "New",
       });     
 
       // (Optional) update local context
@@ -132,16 +132,7 @@ const CreateTask = () => {
             id="title"
             placeholder="Enter task title..."
             value={formData.TaskTitle}
-            onChange={(e) => setFormData({ ...formData, TaskTitle : e.target.value })}
-            className="bg-secondary/50"
-          />
-          <p className="text-xs text-muted-foreground">
-            Select the vertical this task belongs to
-          </p>
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, TaskTitle: e.target.value })}
             className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
           />
           </div>
@@ -159,11 +150,6 @@ const CreateTask = () => {
             placeholder="Describe the task in detail..."
             value={formData.Description}
             onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
-            className="bg-secondary/50 min-h-[120px]"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
             className="pl-10 bg-gray-50 border-gray-200 focus:border-[#34A853] focus:ring-2 focus:ring-[#34A853]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400 min-h-[120px]"
           />
           </div>
@@ -308,8 +294,7 @@ const CreateTask = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="Deadline">Deadline *</Label>
-            <Label htmlFor="deadline" className="text-gray-700 font-medium">Deadline *</Label>
+            <Label htmlFor="Deadline" className="text-gray-700 font-medium">Deadline *</Label>
             <div className="relative group">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calendar"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
@@ -319,9 +304,6 @@ const CreateTask = () => {
               type="date"
               value={formData.Deadline}
               onChange={(e) => setFormData({ ...formData, Deadline: e.target.value })}
-              className="bg-secondary/50"
-              value={formData.deadline}
-              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
               className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
             />
             </div>
@@ -338,9 +320,6 @@ const CreateTask = () => {
               placeholder="e.g., 4 hours"
               value={formData.EstimatedTime}
               onChange={(e) => setFormData({ ...formData, EstimatedTime: e.target.value })}
-              className="bg-secondary/50"
-              value={formData.estimatedTime}
-              onChange={(e) => setFormData({ ...formData, estimatedTime: e.target.value })}
               className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#34A853] focus:ring-2 focus:ring-[#34A853]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
             />
             </div>

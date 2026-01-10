@@ -11,19 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { createUserProfile } from '@/services/userService';
+import { auth } from '@/lib/firebase';
 
 type UserRole = 'lead' | 'member';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState<UserRole>('lead');
-  const [leadForm, setLeadForm] = useState({ name: '', email: '', password: '', vertical: '' });
-  const [memberForm, setMemberForm] = useState({ name: '', email: '', password: '', vertical: '' });
+  const { login: firebaseLogin, register, isAuthenticated } = useAuth();
+  const [role, setRole] = useState<UserRole>('lead');
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', vertical: '' });
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already authenticated
@@ -36,40 +36,226 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent, role: UserRole) => {
     e.preventDefault();
     setIsLoading(true);
-    const form = role === 'lead' ? leadForm : memberForm;
+    const form = formData;
 
-    // Simulate API call
-    setTimeout(() => {
-      if (form.email && form.password && form.name && form.vertical) {
-        login({
-          role: role,
-          email: form.email,
-          name: form.name,
-          vertical: form.vertical
-        });
-        
+    try {
+      if (!form.email || !form.password) {
         toast({
-          title: "Welcome back!",
-          description: `Successfully logged in as ${role === 'lead' ? 'Lead' : 'Member'}.`,
-          className: "border-l-4 border-[#4285F4]" // Google Blue accent
+          title: "Error",
+          description: "Please enter both email and password.",
+          variant: "destructive",
         });
-        
-        // Redirect to appropriate dashboard based on role
-        if (role === 'lead') {
-          navigate('/lead-dashboard');
-        } else {
-          navigate('/member-dashboard');
-        }
         setIsLoading(false);
+        return;
+      }
+
+      // Attempt to log in with Firebase
+      await firebaseLogin(form.email, form.password);
+      
+      toast({
+        title: "Welcome back!",
+        description: `Successfully logged in as ${role === 'lead' ? 'Lead' : 'Member'}.`,
+        className: "border-l-4 border-[#4285F4]" // Google Blue accent
+      });
+      
+      // Redirect to appropriate dashboard based on role
+      if (role === 'lead') {
+        navigate('/lead-dashboard');
       } else {
+        navigate('/member-dashboard');
+      }
+    } catch (error: any) {
+      // Handle different types of authentication errors
+      let errorMessage = "Login failed. Please check your credentials.";
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = "No account found with this email. Please register first.";
+            break;
+          case 'auth/wrong-password':
+            errorMessage = "Incorrect password. Please try again.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Invalid email format. Please check your email.";
+            break;
+          case 'auth/user-disabled':
+            errorMessage = "This account has been disabled.";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = "Too many failed attempts. Please try again later.";
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = "Network error. Please check your connection.";
+            break;
+          default:
+            errorMessage = error.message || `Login failed: ${error.code}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: "Login Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async (role: UserRole) => {
+    setIsLoading(true);
+    console.log('handleGoogleSignup called with role:', role); // Debug logging
+    try {
+      // Import Google auth provider
+      const { GoogleAuthProvider, signInWithPopup } = await import('firebase/auth');
+      const provider = new GoogleAuthProvider();
+      
+      // Sign in with Google popup
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Create user profile in Firestore
+      await createUserProfile(user, {
+        role: role,
+        name: user.displayName || user.email!.split('@')[0],
+        vertical: role === 'lead' ? 'Overall Club' : 'Operations' // Default vertical
+      });
+      
+      toast({
+        title: "Account created!",
+        description: `Successfully signed up as ${role === 'lead' ? 'Lead' : 'Member'} with Google.`,
+        className: "border-l-4 border-[#4285F4]"
+      });
+      
+      // The AuthContext should automatically update via onAuthStateChanged
+      // Wait for a brief moment to allow the state to propagate
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      console.log('About to navigate, role is:', role); // Debug logging
+      if (role === 'lead') {
+        console.log('Navigating to lead dashboard'); // Debug logging
+        navigate('/lead-dashboard');
+      } else {
+        console.log('Navigating to member dashboard'); // Debug logging
+        navigate('/member-dashboard');
+      }
+    } catch (error: any) {
+      // Handle different types of Google signup errors
+      let errorMessage = "Google signup failed. Please try again.";
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/popup-blocked':
+            errorMessage = "Popup blocked. Please allow popups for this site.";
+            break;
+          case 'auth/popup-closed-by-user':
+            errorMessage = "Popup closed. Please try again.";
+            break;
+          case 'auth/cancelled-popup-request':
+            errorMessage = "Request cancelled. Please try again.";
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = "Network error. Please check your connection.";
+            break;
+          default:
+            errorMessage = error.message || `Google signup failed: ${error.code}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: "Google Signup Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent, role: UserRole) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const form = formData;
+
+    try {
+      if (!form.email || !form.password || !form.name || !form.vertical) {
         toast({
           title: "Error",
           description: "Please fill in all fields.",
           variant: "destructive",
         });
         setIsLoading(false);
+        return;
       }
-    }, 1000);
+
+      if (form.password.length < 6) {
+        toast({
+          title: "Error",
+          description: "Password must be at least 6 characters long.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Register user with Firebase
+      await register(form.email, form.password, {
+        role: role,
+        email: form.email,
+        name: form.name,
+        vertical: form.vertical
+      });
+      
+      toast({
+        title: "Account created!",
+        description: `Successfully registered as ${role === 'lead' ? 'Lead' : 'Member'}.`,
+        className: "border-l-4 border-[#4285F4]"
+      });
+      
+      // Redirect to appropriate dashboard based on role
+      if (role === 'lead') {
+        navigate('/lead-dashboard');
+      } else {
+        navigate('/member-dashboard');
+      }
+    } catch (error: any) {
+      // Handle different types of registration errors
+      let errorMessage = "Registration failed. Please try again.";
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = "An account with this email already exists. Please sign in.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Invalid email format. Please check your email.";
+            break;
+          case 'auth/weak-password':
+            errorMessage = "Password is too weak. Please use at least 6 characters.";
+            break;
+          case 'auth/operation-not-allowed':
+            errorMessage = "Email/password authentication is not enabled for this project.";
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = "Network error. Please check your connection.";
+            break;
+          default:
+            errorMessage = error.message || `Registration failed: ${error.code}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: "Registration Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -159,217 +345,194 @@ const Login = () => {
           </CardHeader>
           
           <CardContent className="pt-6">
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as UserRole)} className="w-full">
-              
-              {/* Custom Styled Tabs */}
-              <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100/80 p-1 rounded-xl h-12">
-                <TabsTrigger 
-                  value="lead" 
-                  className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#4285F4] data-[state=active]:shadow-sm transition-all duration-200 font-medium"
-                >
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4" />
-                    Lead
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="member" 
-                  className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#34A853] data-[state=active]:shadow-sm transition-all duration-200 font-medium"
-                >
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Member
-                  </div>
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Login Forms Wrapper */}
-              <div className="mt-2">
-                  {['lead', 'member'].map((role) => (
-                    <TabsContent key={role} value={role} className="space-y-5 focus-visible:outline-none focus-visible:ring-0">
-                        <form onSubmit={(e) => handleLogin(e, role as UserRole)} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor={`${role}-name`} className="text-gray-700 font-medium">Full Name</Label>
-                            <div className="relative group">
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            </div>
-                            <Input
-                                id={`${role}-name`}
-                                type="text"
-                                placeholder="Enter your full name"
-                                value={role === 'lead' ? leadForm.name : memberForm.name}
-                                onChange={(e) => role === 'lead' 
-                                    ? setLeadForm({ ...leadForm, name: e.target.value })
-                                    : setMemberForm({ ...memberForm, name: e.target.value })
-                                }
-                                className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
-                                required
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
-                                onClick={() => {
-                                    if (role === 'lead') {
-                                        setLeadForm({
-                                            ...leadForm,
-                                            name: 'John Smith',
-                                            email: 'john@gdg.dev',
-                                            vertical: 'Design'
-                                        });
-                                    } else {
-                                        setMemberForm({
-                                            ...memberForm,
-                                            name: 'Jane Doe',
-                                            email: 'jane@gdg.dev',
-                                            vertical: 'Tech'
-                                        });
-                                    }
-                                }}
-                            >
-                                Demo
-                            </Button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Vertical</Label>
-                            <Select
-                                value={role === 'lead' ? leadForm.vertical : memberForm.vertical}
-                                onValueChange={(value) => role === 'lead' 
-                                    ? setLeadForm({ ...leadForm, vertical: value })
-                                    : setMemberForm({ ...memberForm, vertical: value })
-                                }
-                                required
-                            >
-                                <SelectTrigger className="bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900">
-                                    <SelectValue placeholder="Select your vertical" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Overall Club">Overall Club</SelectItem>
-                                    <SelectItem value="Operations">Operations</SelectItem>
-                                    <SelectItem value="PR">PR</SelectItem>
-                                    <SelectItem value="Design">Design</SelectItem>
-                                    <SelectItem value="Tech">Tech</SelectItem>
-                                    <SelectItem value="Marketing">Marketing</SelectItem>
-                                    <SelectItem value="Social Media">Social Media</SelectItem>
-                                    <SelectItem value="Content">Content</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor={`${role}-email`} className="text-gray-700 font-medium">Email Address</Label>
-                            <div className="relative group">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors" />
-                            <Input
-                                id={`${role}-email`}
-                                type="email"
-                                placeholder={`${role}@gdg.dev`}
-                                value={role === 'lead' ? leadForm.email : memberForm.email}
-                                onChange={(e) => role === 'lead' 
-                                    ? setLeadForm({ ...leadForm, email: e.target.value })
-                                    : setMemberForm({ ...memberForm, email: e.target.value })
-                                }
-                                className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
-                                required
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
-                                onClick={() => {
-                                    if (role === 'lead') {
-                                        setLeadForm({
-                                            ...leadForm,
-                                            email: 'john@gdg.dev',
-                                            password: 'password123'
-                                        });
-                                    } else {
-                                        setMemberForm({
-                                            ...memberForm,
-                                            email: 'jane@gdg.dev',
-                                            password: 'password123'
-                                        });
-                                    }
-                                }}
-                            >
-                                Demo
-                            </Button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor={`${role}-password`} className="text-gray-700 font-medium">Password</Label>
-                            <div className="relative group">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors" />
-                            <Input
-                                id={`${role}-password`}
-                                type="password"
-                                placeholder="••••••••"
-                                value={role === 'lead' ? leadForm.password : memberForm.password}
-                                onChange={(e) => role === 'lead'
-                                    ? setLeadForm({ ...leadForm, password: e.target.value })
-                                    : setMemberForm({ ...memberForm, password: e.target.value })
-                                }
-                                className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
-                                required
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
-                                onClick={() => {
-                                    if (role === 'lead') {
-                                        setLeadForm({
-                                            ...leadForm,
-                                            password: 'password123'
-                                        });
-                                    } else {
-                                        setMemberForm({
-                                            ...memberForm,
-                                            password: 'password123'
-                                        });
-                                    }
-                                }}
-                            >
-                                Demo
-                            </Button>
-                            </div>
-                        </div>
-
-                        <Button
-                            type="submit"
-                            className={`w-full h-11 text-base font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mt-2
-                                ${role === 'lead' 
-                                    ? 'bg-[#4285F4] hover:bg-[#3367D6] shadow-[#4285F4]/20' 
-                                    : 'bg-[#34A853] hover:bg-[#2D9249] shadow-[#34A853]/20'
-                                }`}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                'Signing in...'
-                            ) : (
-                                <span className="flex items-center gap-2">
-                                    Sign in as {role.charAt(0).toUpperCase() + role.slice(1)} <ChevronRight className="w-4 h-4" />
-                                </span>
-                            )}
-                        </Button>
-                        </form>
-                    </TabsContent>
-                  ))}
+              {/* Role Selection Dropdown */}
+              <div className="space-y-2 mb-6">
+                <Label htmlFor="role-select" className="text-gray-700 font-medium">Select Role</Label>
+                <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
+                  <SelectTrigger className="w-full bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 h-11">
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lead">
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-4 h-4" />
+                        Lead
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="member">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Member
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Single Login Form */}
+              <form onSubmit={(e) => handleLogin(e, role)} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-gray-700 font-medium">Full Name</Label>
+                  <div className="relative group">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          name: role === 'lead' ? 'John Smith' : 'Jane Doe',
+                          email: role === 'lead' ? 'john@gdg.dev' : 'jane@gdg.dev',
+                          vertical: role === 'lead' ? 'Design' : 'Tech'
+                        });
+                      }}
+                    >
+                      Demo
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="vertical">Vertical</Label>
+                  <Select
+                    value={formData.vertical}
+                    onValueChange={(value) => setFormData({ ...formData, vertical: value })}
+                    required
+                  >
+                    <SelectTrigger className="bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900">
+                      <SelectValue placeholder="Select your vertical" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Overall Club">Overall Club</SelectItem>
+                      <SelectItem value="Operations">Operations</SelectItem>
+                      <SelectItem value="PR">PR</SelectItem>
+                      <SelectItem value="Design">Design</SelectItem>
+                      <SelectItem value="Tech">Tech</SelectItem>
+                      <SelectItem value="Marketing">Marketing</SelectItem>
+                      <SelectItem value="Social Media">Social Media</SelectItem>
+                      <SelectItem value="Content">Content</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-700 font-medium">Email Address</Label>
+                  <div className="relative group">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={`${role}@gdg.dev`}
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          email: role === 'lead' ? 'john@gdg.dev' : 'jane@gdg.dev',
+                          password: 'password123'
+                        });
+                      }}
+                    >
+                      Demo
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#4285F4] transition-colors" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="pl-10 h-11 bg-gray-50 border-gray-200 focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4]/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-400"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-[#4285F4]"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          password: 'password123'
+                        });
+                      }}
+                    >
+                      Demo
+                    </Button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className={`w-full h-11 text-base font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mt-2
+                    ${role === 'lead' 
+                      ? 'bg-[#4285F4] hover:bg-[#3367D6] shadow-[#4285F4]/20' 
+                      : 'bg-[#34A853] hover:bg-[#2D9249] shadow-[#34A853]/20'
+                    }`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    'Signing in...'
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      Sign in as {role.charAt(0).toUpperCase() + role.slice(1)} <ChevronRight className="w-4 h-4" />
+                    </span>
+                  )}
+                </Button>
+                
+                {/* Google Signup buttons */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-11 text-base font-medium rounded-xl mt-2 border-gray-300 hover:bg-gray-50 text-gray-700"
+                  disabled={isLoading}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleGoogleSignup(role);
+                  }}
+                >
+                  {isLoading ? (
+                    'Signing up...'
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      Sign up as {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </span>
+                  )}
+                </Button>
+              </form>
 
               <div className="mt-6 pt-6 border-t border-gray-100 text-center">
                 <p className="text-xs text-gray-400">
                   Join the community to start collaborating
                 </p>
               </div>
-            </Tabs>
           </CardContent>
         </Card>
 
