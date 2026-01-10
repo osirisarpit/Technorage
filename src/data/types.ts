@@ -43,7 +43,7 @@ export interface Activity {
   type: 'submission' | 'started' | 'overdue' | 'completed' | 'assigned';
   memberName: string;
   memberAvatar: string;
-  taskTitle: string;
+  TaskTitle: string;
   vertical: Vertical;
   timestamp: string;
 }
@@ -68,6 +68,13 @@ export const getPriorityColor = (priority: Priority): string => {
   };
   return colors[priority];
 };
+
+export interface MemberTask {
+  username: string;
+  vertical: Vertical;
+  taskTitle: string;
+  description: string;
+}
 
 export const verticals: Vertical[] = [
   'Operations',

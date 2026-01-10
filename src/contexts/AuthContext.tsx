@@ -23,6 +23,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  username: string | null;  // This will be the name from the user profile which should match Google Sheets Username column
+  loading?: boolean; // Added for backward compatibility
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -159,6 +161,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         user,
+        username: user?.name || null,  // Extract name from user profile as username
         isAuthenticated: !!user,
         login,
         logout,
